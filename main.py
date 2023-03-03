@@ -61,10 +61,21 @@ def remove_client(id : int, db: Session = Depends(get_db)):
 ## PUT
 ###########
 
-@app.put("/api/put/client", status_code=status.HTTP_201_CREATED)
-def new_client(client: ClientModel , db: Session = Depends(get_db)):
-    new_client = Client(id = client.id, client_name = client.client_name, post_url = client.post_url, price=client.price, days_number = client.days_number, is_finished = client.is_finished)
-    db.add(new_client)
+@app.put("/api/put/client/{id}", status_code=status.HTTP_202_ACCEPTED)
+def put_client(id : int, client: ClientModel , db: Session = Depends(get_db)):
+    old_client = db.query(Client).filter(Client.id == id)
+    if not old_client.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"We not Found Client with id= {id}")
+    
+    put_client = {
+                Client.client_name : client.client_name, 
+                Client.post_url : client.post_url,
+                Client.price : client.price, 
+                Client.days_number : client.days_number, 
+                Client.is_finished  : client.is_finished ,
+                 }
+    
+    old_client.update(put_client)
     db.commit()
-    db.refresh(new_client)
+    
     return client
