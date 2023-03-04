@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from typing import Optional
 # Enum => to set the type
 from enum import Enum
+from pydantic import BaseModel
+
+
 
 app = FastAPI()
 
@@ -130,7 +133,30 @@ async def get_list_items_by_2_id(user_id:int, items_id:int, q:str |None = None, 
     return data
 
 
+                  
 ###############################################
+               # POST
 ## Fast API Tutorial, Part 4: Request Body
 ###############################################
 
+class Item(BaseModel):
+    name : str
+    desc : str | None = None
+    price : float
+    tax : float | None = None
+
+
+@app.post('/post/items', tags=['Part 4: Request Body'])
+async def create_item(item: Item):
+    item_dict = item.dict()
+
+    if item.tax:
+        price_with_tax =  item.tax + item.price
+        item_dict.update({'price_with_tax':price_with_tax})
+
+    return item_dict
+
+
+###################################################################
+# Fast API Tutorial, Part 5: Query Parameters and String Validation
+###################################################################
